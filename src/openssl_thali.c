@@ -18,6 +18,8 @@ static X509* create_x509_cert(EVP_PKEY *privkey);
 static STACK_OF(X509)* create_ca_cert_stack(X509 *cert);
 static void* free_openssl_resources(EVP_PKEY *key, X509 *cert, STACK_OF(X509) *certstack);
 
+#define MAX_KEY_SIZE 4096
+
 //TODO: Remove this main function
 int main(int argc, char **argv)
 {
@@ -49,6 +51,11 @@ PKCS12* create_PKCS12_stream(int keysize, const char *password)
           fprintf(stderr,"Invalid key-size and/or password.\n");
           return NULL;
      }
+     if(keysize > MAX_KEY_SIZE)
+     {
+          fprintf(stderr,"Limit the keysize to 4096 bits.\n");
+          return NULL;
+     }
      
      init_openssl();
      
@@ -57,21 +64,21 @@ PKCS12* create_PKCS12_stream(int keysize, const char *password)
      {
           return (PKCS12*)free_openssl_resources(privkey, x509_cert, cacertstack);
      }
-     fprintf(stdout,"successfully created rsa key.\n");
+     fprintf(stdout,"Successfully created rsa key.\n");
      
      x509_cert = create_x509_cert(privkey);
      if(x509_cert == NULL)
      {
           return (PKCS12*)free_openssl_resources(privkey, x509_cert, cacertstack);
      }
-     fprintf(stdout,"successfully created x509 certificate.\n");
+     fprintf(stdout,"Successfully created x509 certificate.\n");
      
      cacertstack = create_ca_cert_stack(x509_cert);
      if(cacertstack == NULL)
      {
           return (PKCS12*)free_openssl_resources(privkey, x509_cert, cacertstack);
      }
-     fprintf(stdout,"successfully created stack-of-x509.\n");
+     fprintf(stdout,"Successfully created stack-of-x509.\n");
      
      if ((pkcs12bundle = PKCS12_new()) == NULL)
      {
@@ -95,7 +102,7 @@ PKCS12* create_PKCS12_stream(int keysize, const char *password)
           fprintf(stderr,"PKCS12_create failed.\n");
           return (PKCS12*)free_openssl_resources(privkey, x509_cert, cacertstack);
      }
-     fprintf(stdout,"successfully created pkcs12 bundle.\n");
+     fprintf(stdout,"Successfully created pkcs12 bundle.\n");
      
      free_openssl_resources(privkey, x509_cert, cacertstack);
      
